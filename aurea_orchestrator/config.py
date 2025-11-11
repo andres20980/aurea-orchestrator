@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     # API Keys
-    anthropic_api_key: str = ""
+    google_api_key: str = ""  # For Gemini
     openai_api_key: str = ""
 
     # Database
@@ -23,9 +23,10 @@ class Settings(BaseSettings):
     celery_result_backend: str = "redis://localhost:6379/1"
 
     # Model Configuration
-    claude_model: str = "claude-3-sonnet-20240229"
-    deepseek_model: str = "gpt-3.5-turbo"
+    gemini_model: str = "gemini-1.5-pro"
+    openai_model: str = "gpt-4"
     complexity_threshold: float = 0.5
+    default_model_provider: str = "gemini"  # gemini or openai
 
 
 settings = Settings()

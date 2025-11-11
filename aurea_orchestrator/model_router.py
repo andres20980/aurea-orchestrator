@@ -1,10 +1,10 @@
-"""Model Router for selecting between Claude and DeepSeek based on task complexity."""
+"""Model Router for selecting between Gemini and OpenAI based on task complexity."""
 
 from enum import Enum
 from typing import Any
 
-from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseLanguageModel
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
 
 from aurea_orchestrator.config import settings
@@ -13,8 +13,8 @@ from aurea_orchestrator.config import settings
 class ModelType(str, Enum):
     """Model types available."""
 
-    CLAUDE = "claude"
-    DEEPSEEK = "deepseek"
+    GEMINI = "gemini"
+    OPENAI = "openai"
 
 
 class TaskComplexity(str, Enum):
@@ -30,42 +30,43 @@ class ModelRouter:
     def __init__(
         self,
         complexity_threshold: float = None,
-        claude_model: str = None,
-        deepseek_model: str = None,
+        gemini_model: str = None,
+        openai_model: str = None,
     ):
         """Initialize the model router.
 
         Args:
             complexity_threshold: Threshold for complexity (0.0-1.0)
-            claude_model: Claude model name
-            deepseek_model: DeepSeek/OpenAI model name
+            gemini_model: Gemini model name
+            openai_model: OpenAI model name
         """
         self.complexity_threshold = complexity_threshold or settings.complexity_threshold
-        self.claude_model = claude_model or settings.claude_model
-        self.deepseek_model = deepseek_model or settings.deepseek_model
+        self.gemini_model = gemini_model or settings.gemini_model
+        self.openai_model = openai_model or settings.openai_model
 
-        self._claude_instance = None
-        self._deepseek_instance = None
+        self._gemini_instance = None
+        self._openai_instance = None
 
-    def _get_claude(self) -> BaseLanguageModel:
-        """Get or create Claude instance."""
-        if self._claude_instance is None:
-            self._claude_instance = ChatAnthropic(
-                model=self.claude_model,
-                anthropic_api_key=settings.anthropic_api_key,
+    def _get_gemini(self) -> BaseLanguageModel:
+        """Get or create Gemini instance."""
+        if self._gemini_instance is None:
+            self._gemini_instance = ChatGoogleGenerativeAI(
+                model=self.gemini_model,
+                google_api_key=settings.google_api_key,
                 temperature=0.7,
+                convert_system_message_to_human=True,  # Gemini compatibility
             )
-        return self._claude_instance
+        return self._gemini_instance
 
-    def _get_deepseek(self) -> BaseLanguageModel:
-        """Get or create DeepSeek/OpenAI instance."""
-        if self._deepseek_instance is None:
-            self._deepseek_instance = ChatOpenAI(
-                model=self.deepseek_model,
+    def _get_openai(self) -> BaseLanguageModel:
+        """Get or create OpenAI instance."""
+        if self._openai_instance is None:
+            self._openai_instance = ChatOpenAI(
+                model=self.openai_model,
                 openai_api_key=settings.openai_api_key,
                 temperature=0.7,
             )
-        return self._deepseek_instance
+        return self._openai_instance
 
     def calculate_complexity(self, task_description: str, metadata: dict[str, Any] = None) -> float:
         """Calculate task complexity score.
@@ -123,9 +124,15 @@ class ModelRouter:
         """
         complexity = self.calculate_complexity(task_description, metadata)
 
+        # Use default provider preference if configured
+        default_provider = getattr(settings, 'default_model_provider', 'gemini')
+        
         if complexity >= self.complexity_threshold:
-            return ModelType.CLAUDE
-        return ModelType.DEEPSEEK
+            # Complex task: use configured primary model (default: Gemini Pro or OpenAI)
+            return ModelType.GEMINI if default_provider == 'gemini' else ModelType.OPENAI
+        
+        # Simple task: use Gemini Flash (fastest/cheapest) or fallback
+        return ModelType.GEMINI
 
     def get_model(
         self, task_description: str, metadata: dict[str, Any] = None
@@ -141,9 +148,9 @@ class ModelRouter:
         """
         model_type = self.determine_model_type(task_description, metadata)
 
-        if model_type == ModelType.CLAUDE:
-            return self._get_claude()
-        return self._get_deepseek()
+        if model_type == ModelType.GEMINI:
+            return self._get_gemini()
+        return self._get_openai()
 
 
 # Global router instance
