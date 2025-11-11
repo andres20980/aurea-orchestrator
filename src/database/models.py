@@ -2,8 +2,7 @@
 
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, Float, DateTime, JSON, ForeignKey, Text, Enum
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import declarative_base, relationship
 import enum
 
 Base = declarative_base()
@@ -33,7 +32,7 @@ class EvalRun(Base):
     average_accuracy = Column(Float, nullable=True)
     average_latency = Column(Float, nullable=True)
     total_cost = Column(Float, nullable=True)
-    metadata = Column(JSON, nullable=True)
+    run_metadata = Column(JSON, nullable=True)
 
     # Relationship to individual results
     results = relationship("EvalResult", back_populates="run", cascade="all, delete-orphan")
@@ -63,7 +62,7 @@ class EvalResult(Base):
     # Additional info
     error_message = Column(Text, nullable=True)
     executed_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    metadata = Column(JSON, nullable=True)
+    result_metadata = Column(JSON, nullable=True)
 
     # Relationship
     run = relationship("EvalRun", back_populates="results")

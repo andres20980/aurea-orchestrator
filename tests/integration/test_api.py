@@ -30,7 +30,7 @@ def override_get_db():
 app.dependency_overrides[get_db] = override_get_db
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="function", autouse=True)
 def test_db():
     """Create test database"""
     Base.metadata.create_all(bind=engine)
@@ -39,9 +39,10 @@ def test_db():
 
 
 @pytest.fixture
-def client(test_db):
+def client():
     """Create test client"""
-    return TestClient(app)
+    with TestClient(app) as test_client:
+        yield test_client
 
 
 def test_root_endpoint(client):

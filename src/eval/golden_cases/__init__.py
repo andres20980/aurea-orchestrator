@@ -1,7 +1,7 @@
 """Golden test cases loader"""
 
 from typing import List, Dict, Any, Optional
-from ..models.eval_models import FeatureType
+from ...models.eval_models import FeatureType
 
 # Import golden cases from feature modules
 from .code_generation import GOLDEN_CASES as CODE_GEN_CASES

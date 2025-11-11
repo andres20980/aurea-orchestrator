@@ -84,7 +84,7 @@ class EvalRunner:
             status=EvalStatus.RUNNING,
             feature_type=feature_type.value if feature_type else None,
             started_at=datetime.utcnow(),
-            metadata=metadata or {}
+            run_metadata=metadata or {}
         )
         self.db.add(eval_run)
         self.db.commit()
@@ -133,7 +133,7 @@ class EvalRunner:
             # Mark run as failed
             eval_run.status = EvalStatus.FAILED
             eval_run.completed_at = datetime.utcnow()
-            eval_run.metadata = {**(metadata or {}), "error": str(e)}
+            eval_run.run_metadata = {**(metadata or {}), "error": str(e)}
             self.db.commit()
             raise
     
@@ -190,7 +190,7 @@ class EvalRunner:
                 latency_ms=score.latency_ms,
                 cost=score.cost,
                 executed_at=datetime.utcnow(),
-                metadata=case_data.get("metadata")
+                result_metadata=case_data.get("metadata")
             )
             
         except Exception as e:
@@ -209,7 +209,7 @@ class EvalRunner:
                 cost=0.0,
                 error_message=str(e),
                 executed_at=datetime.utcnow(),
-                metadata=case_data.get("metadata")
+                result_metadata=case_data.get("metadata")
             )
         
         self.db.add(result)
