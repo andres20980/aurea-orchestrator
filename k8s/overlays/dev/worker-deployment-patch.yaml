@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aurea-celery-worker
+  namespace: aurea-orchestrator
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: worker
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+        env:
+        - name: APP_ENV
+          value: "development"
+        - name: DEBUG
+          value: "true"
+        args:
+        - "-A"
+        - "app.celery"
+        - "worker"
+        - "--loglevel=debug"
+        - "--concurrency=2"

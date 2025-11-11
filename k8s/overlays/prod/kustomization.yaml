@@ -1,0 +1,54 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: aurea-orchestrator-prod
+
+namePrefix: prod-
+
+resources:
+  - ../../base
+
+labels:
+  - pairs:
+      environment: prod
+
+# Patches for production environment
+patches:
+  - path: api-deployment-patch.yaml
+  - path: worker-deployment-patch.yaml
+  - path: configmap-patch.yaml
+  - path: ingress-patch.yaml
+  - path: api-hpa-patch.yaml
+  - path: worker-keda-patch.yaml
+
+# Image tags for production
+images:
+  - name: aurea-orchestrator-api
+    newName: aurea-orchestrator-api
+    newTag: stable
+  - name: aurea-orchestrator-worker
+    newName: aurea-orchestrator-worker
+    newTag: stable
+
+# Resource configuration for production
+replicas:
+  - name: aurea-api
+    count: 3
+  - name: aurea-celery-worker
+    count: 3
+
+# Image tags for production
+images:
+  - name: aurea-orchestrator-api
+    newName: aurea-orchestrator-api
+    newTag: stable
+  - name: aurea-orchestrator-worker
+    newName: aurea-orchestrator-worker
+    newTag: stable
+
+# Resource configuration for production
+replicas:
+  - name: aurea-api
+    count: 3
+  - name: aurea-celery-worker
+    count: 3

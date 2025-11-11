@@ -1,0 +1,15 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: aurea-high-priority
+value: 1000
+globalDefault: false
+description: "High priority class for critical aurea-orchestrator components"
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: aurea-normal-priority
+value: 500
+globalDefault: false
+description: "Normal priority class for aurea-orchestrator workers"
