@@ -1,0 +1,116 @@
+{
+  "dashboard": {
+    "title": "Aurea Orchestrator Monitoring",
+    "tags": ["aurea", "monitoring", "metrics"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Total Cost by Job",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "format": "time_series",
+            "rawSql": "SELECT created_at AS time, job_id, SUM(cost_estimate) as cost FROM metrics GROUP BY job_id, created_at ORDER BY created_at",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Average Latency by Task",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "format": "time_series",
+            "rawSql": "SELECT created_at AS time, task_name, AVG(latency_ms) as latency FROM metrics GROUP BY task_name, created_at ORDER BY created_at",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Token Usage by Model",
+        "type": "piechart",
+        "gridPos": {"x": 0, "y": 8, "w": 8, "h": 8},
+        "targets": [
+          {
+            "format": "table",
+            "rawSql": "SELECT model_used, SUM(token_count) as tokens FROM metrics GROUP BY model_used ORDER BY tokens DESC",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Cost Breakdown by Model",
+        "type": "piechart",
+        "gridPos": {"x": 8, "y": 8, "w": 8, "h": 8},
+        "targets": [
+          {
+            "format": "table",
+            "rawSql": "SELECT model_used, SUM(cost_estimate) as cost FROM metrics GROUP BY model_used ORDER BY cost DESC",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Task Execution Timeline",
+        "type": "table",
+        "gridPos": {"x": 16, "y": 8, "w": 8, "h": 8},
+        "targets": [
+          {
+            "format": "table",
+            "rawSql": "SELECT created_at, job_id, task_name, model_used, token_count, latency_ms, cost_estimate FROM metrics ORDER BY created_at DESC LIMIT 100",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Total Metrics",
+        "type": "stat",
+        "gridPos": {"x": 0, "y": 16, "w": 6, "h": 4},
+        "targets": [
+          {
+            "format": "table",
+            "rawSql": "SELECT COUNT(*) as tasks, SUM(token_count) as tokens, SUM(cost_estimate) as cost FROM metrics",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Active Jobs",
+        "type": "stat",
+        "gridPos": {"x": 6, "y": 16, "w": 6, "h": 4},
+        "targets": [
+          {
+            "format": "table",
+            "rawSql": "SELECT COUNT(DISTINCT job_id) as jobs FROM metrics",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Latency Distribution",
+        "type": "histogram",
+        "gridPos": {"x": 12, "y": 16, "w": 12, "h": 8},
+        "targets": [
+          {
+            "format": "time_series",
+            "rawSql": "SELECT latency_ms FROM metrics ORDER BY created_at DESC LIMIT 1000",
+            "refId": "A"
+          }
+        ]
+      }
+    ],
+    "refresh": "5s",
+    "schemaVersion": 16,
+    "version": 0
+  }
+}
