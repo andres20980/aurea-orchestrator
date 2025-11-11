@@ -2,6 +2,7 @@
 import os
 import pytest
 from unittest.mock import Mock, patch, MagicMock
+from pathlib import Path
 from kb import KnowledgeBase
 
 
@@ -40,6 +41,23 @@ class TestKnowledgeBase:
         assert len(embedding) == 1536
         assert embedding[0] == 0.1
         mock_litellm.assert_called_once()
+    
+    def test_validate_path_valid(self, tmp_path):
+        """Test path validation with valid path."""
+        kb = KnowledgeBase()
+        test_file = tmp_path / "test.txt"
+        test_file.write_text("test")
+        
+        validated = kb._validate_path(str(test_file))
+        assert validated.exists()
+        assert validated.is_absolute()
+    
+    def test_validate_path_nonexistent(self):
+        """Test path validation with nonexistent path."""
+        kb = KnowledgeBase()
+        
+        with pytest.raises(ValueError, match="Path does not exist"):
+            kb._validate_path("/nonexistent/path/to/file.txt")
     
     def test_index_file_new(self, mock_db_connection, mock_litellm):
         """Test indexing a new file."""
@@ -98,6 +116,16 @@ class TestKnowledgeBase:
         assert result['indexed'] == 2
         assert len(result['files']) == 2
         assert len(result['errors']) == 0
+    
+    def test_index_directory_nonexistent(self, mock_db_connection, mock_litellm):
+        """Test indexing a nonexistent directory."""
+        kb = KnowledgeBase()
+        result = kb.index_directory("/nonexistent/directory")
+        
+        assert result['indexed'] == 0
+        assert len(result['files']) == 0
+        assert len(result['errors']) == 1
+        assert 'does not exist' in result['errors'][0]['error']
 
 
 if __name__ == "__main__":
