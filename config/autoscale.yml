@@ -1,0 +1,237 @@
+---
+# Autoscaling Policy Configuration for Aurea Orchestrator
+# This file defines dynamic tuning policies for HPA and KEDA autoscalers
+
+apiVersion: v1
+kind: AutoscalePolicy
+metadata:
+  name: aurea-orchestrator-autoscale-policy
+  description: Dynamic autoscaling policy based on internal metrics
+
+# Metrics Configuration
+metrics:
+  # Jobs Queued Metric
+  jobsQueued:
+    enabled: true
+    source: internal
+    threshold:
+      min: 0
+      max: 1000
+      target: 10
+    scalingBehavior:
+      scaleUp:
+        stabilizationWindowSeconds: 60
+        policies:
+          - type: Percent
+            value: 50
+            periodSeconds: 60
+          - type: Pods
+            value: 2
+            periodSeconds: 60
+        selectPolicy: Max
+      scaleDown:
+        stabilizationWindowSeconds: 300
+        policies:
+          - type: Percent
+            value: 10
+            periodSeconds: 60
+        selectPolicy: Min
+    weight: 40
+
+  # Average Latency Metric
+  avgLatency:
+    enabled: true
+    source: internal
+    unit: milliseconds
+    threshold:
+      min: 0
+      max: 5000
+      target: 100
+    scalingBehavior:
+      scaleUp:
+        stabilizationWindowSeconds: 30
+        policies:
+          - type: Percent
+            value: 100
+            periodSeconds: 30
+          - type: Pods
+            value: 4
+            periodSeconds: 30
+        selectPolicy: Max
+      scaleDown:
+        stabilizationWindowSeconds: 600
+        policies:
+          - type: Percent
+            value: 5
+            periodSeconds: 120
+        selectPolicy: Min
+    weight: 35
+
+  # Resource Usage Metric (CPU/Memory)
+  resourceUsage:
+    enabled: true
+    source: internal
+    cpu:
+      enabled: true
+      threshold:
+        min: 0
+        max: 100
+        target: 70
+      unit: percent
+    memory:
+      enabled: true
+      threshold:
+        min: 0
+        max: 100
+        target: 80
+      unit: percent
+    scalingBehavior:
+      scaleUp:
+        stabilizationWindowSeconds: 120
+        policies:
+          - type: Percent
+            value: 30
+            periodSeconds: 60
+          - type: Pods
+            value: 2
+            periodSeconds: 60
+        selectPolicy: Max
+      scaleDown:
+        stabilizationWindowSeconds: 300
+        policies:
+          - type: Percent
+            value: 10
+            periodSeconds: 120
+        selectPolicy: Min
+    weight: 25
+
+# Autoscaler Configuration
+autoscaler:
+  # Horizontal Pod Autoscaler (HPA) Configuration
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 100
+    behavior:
+      scaleUp:
+        stabilizationWindowSeconds: 60
+        policies:
+          - type: Percent
+            value: 100
+            periodSeconds: 15
+          - type: Pods
+            value: 4
+            periodSeconds: 15
+        selectPolicy: Max
+      scaleDown:
+        stabilizationWindowSeconds: 300
+        policies:
+          - type: Percent
+            value: 10
+            periodSeconds: 60
+        selectPolicy: Min
+
+  # KEDA Configuration
+  keda:
+    enabled: true
+    pollingInterval: 30
+    cooldownPeriod: 300
+    minReplicaCount: 1
+    maxReplicaCount: 100
+    fallback:
+      failureThreshold: 3
+      replicas: 6
+    advanced:
+      restoreToOriginalReplicaCount: false
+      horizontalPodAutoscalerConfig:
+        behavior:
+          scaleUp:
+            stabilizationWindowSeconds: 60
+            policies:
+              - type: Percent
+                value: 100
+                periodSeconds: 15
+              - type: Pods
+                value: 4
+                periodSeconds: 15
+            selectPolicy: Max
+          scaleDown:
+            stabilizationWindowSeconds: 300
+            policies:
+              - type: Percent
+                value: 10
+                periodSeconds: 60
+            selectPolicy: Min
+
+# Metric Collection Configuration
+metricCollection:
+  prometheus:
+    enabled: true
+    port: 9090
+    endpoint: /metrics
+    scrapeInterval: 15s
+  customMetricsAPI:
+    enabled: true
+    namespace: custom-metrics
+  externalMetricsAPI:
+    enabled: true
+    namespace: external-metrics
+
+# Dynamic Tuning Rules
+dynamicTuning:
+  enabled: true
+  rules:
+    - name: high-load-burst
+      condition: jobsQueued > 500 OR avgLatency > 500
+      action:
+        scaleUp:
+          factor: 2
+          maxPods: 50
+      duration: 5m
+    
+    - name: sustained-high-load
+      condition: jobsQueued > 200 AND avgLatency > 200
+      action:
+        scaleUp:
+          factor: 1.5
+          maxPods: 75
+      duration: 10m
+    
+    - name: low-load-optimization
+      condition: jobsQueued < 5 AND avgLatency < 50 AND resourceUsage.cpu < 20
+      action:
+        scaleDown:
+          factor: 0.5
+          minPods: 1
+      duration: 15m
+    
+    - name: resource-pressure
+      condition: resourceUsage.cpu > 85 OR resourceUsage.memory > 90
+      action:
+        scaleUp:
+          factor: 1.3
+          maxPods: 100
+      duration: 3m
+
+# Alerts and Notifications
+alerts:
+  enabled: true
+  thresholds:
+    criticalJobsQueued: 800
+    criticalLatency: 1000
+    criticalCPU: 90
+    criticalMemory: 95
+  notifications:
+    - type: webhook
+      enabled: false
+      url: ""
+    - type: prometheus
+      enabled: true
+
+# Logging and Monitoring
+logging:
+  level: info
+  format: json
+  metricsLogging:
+    enabled: true
+    interval: 60s
