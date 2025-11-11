@@ -1,0 +1,160 @@
+{
+  "dashboard": {
+    "title": "Aurea Agent Evaluation Metrics",
+    "tags": ["agent", "evaluation", "metrics"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Average Accuracy Trend",
+        "type": "graph",
+        "gridPos": {
+          "x": 0,
+          "y": 0,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "rawSql": "SELECT started_at as time, average_accuracy FROM eval_runs WHERE status = 'completed' ORDER BY started_at",
+            "format": "time_series"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Accuracy",
+            "min": 0,
+            "max": 1,
+            "format": "percentunit"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Average Latency Trend",
+        "type": "graph",
+        "gridPos": {
+          "x": 12,
+          "y": 0,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "rawSql": "SELECT started_at as time, average_latency FROM eval_runs WHERE status = 'completed' ORDER BY started_at",
+            "format": "time_series"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Latency (ms)",
+            "min": 0,
+            "format": "ms"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Total Cost Trend",
+        "type": "graph",
+        "gridPos": {
+          "x": 0,
+          "y": 8,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "rawSql": "SELECT started_at as time, total_cost FROM eval_runs WHERE status = 'completed' ORDER BY started_at",
+            "format": "time_series"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Cost (USD)",
+            "min": 0,
+            "format": "currencyUSD"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Pass Rate by Feature Type",
+        "type": "bargauge",
+        "gridPos": {
+          "x": 12,
+          "y": 8,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "rawSql": "SELECT feature_type, AVG(CAST(passed_cases AS FLOAT) / NULLIF(total_cases, 0)) * 100 as pass_rate FROM eval_runs WHERE status = 'completed' AND feature_type IS NOT NULL GROUP BY feature_type",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Recent Evaluation Runs",
+        "type": "table",
+        "gridPos": {
+          "x": 0,
+          "y": 16,
+          "w": 24,
+          "h": 8
+        },
+        "targets": [
+          {
+            "rawSql": "SELECT run_id, feature_type, status, total_cases, passed_cases, failed_cases, average_accuracy, average_latency, total_cost, started_at, completed_at FROM eval_runs ORDER BY started_at DESC LIMIT 20",
+            "format": "table"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Accuracy Distribution",
+        "type": "histogram",
+        "gridPos": {
+          "x": 0,
+          "y": 24,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "rawSql": "SELECT accuracy FROM eval_results WHERE accuracy IS NOT NULL",
+            "format": "table"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Test Results by Type",
+        "type": "piechart",
+        "gridPos": {
+          "x": 12,
+          "y": 24,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "rawSql": "SELECT test_type, COUNT(*) as count FROM eval_results GROUP BY test_type",
+            "format": "table"
+          }
+        ]
+      }
+    ],
+    "refresh": "30s",
+    "schemaVersion": 27,
+    "version": 1
+  }
+}
