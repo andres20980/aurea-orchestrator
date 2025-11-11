@@ -1,0 +1,31 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: aurea-api-pdb
+  namespace: aurea-orchestrator
+  labels:
+    app.kubernetes.io/name: aurea-orchestrator
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: aurea-orchestrator
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: aurea-orchestrator
+      app.kubernetes.io/component: api
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: aurea-celery-worker-pdb
+  namespace: aurea-orchestrator
+  labels:
+    app.kubernetes.io/name: aurea-orchestrator
+    app.kubernetes.io/component: worker
+    app.kubernetes.io/part-of: aurea-orchestrator
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: aurea-orchestrator
+      app.kubernetes.io/component: worker

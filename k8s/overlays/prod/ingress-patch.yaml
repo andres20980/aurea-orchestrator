@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aurea-api-ingress
+  namespace: aurea-orchestrator
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/rate-limit: "200"
+spec:
+  tls:
+  - hosts:
+    - aurea-orchestrator.example.com
+    secretName: aurea-api-tls-prod
+  rules:
+  - host: aurea-orchestrator.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: aurea-api-service
+            port:
+              number: 80

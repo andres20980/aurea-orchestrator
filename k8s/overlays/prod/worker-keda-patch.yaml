@@ -1,0 +1,12 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: aurea-celery-worker-scaler
+  namespace: aurea-orchestrator
+spec:
+  minReplicaCount: 3
+  maxReplicaCount: 50
+  triggers:
+  - type: redis
+    metadata:
+      listLength: "10"

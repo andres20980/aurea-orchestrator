@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aurea-orchestrator-config
+  namespace: aurea-orchestrator
+data:
+  LOG_LEVEL: "WARNING"
+  WORKERS: "8"
