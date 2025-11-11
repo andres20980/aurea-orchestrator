@@ -1,6 +1,7 @@
 """Knowledge Base module for embedding and querying project files."""
 import os
 from typing import List, Dict, Any
+from pathlib import Path
 import litellm
 from database import get_db_connection
 from config import settings
@@ -14,6 +15,28 @@ class KnowledgeBase:
         self.embedding_model = settings.embedding_model
         if settings.openai_api_key:
             os.environ["OPENAI_API_KEY"] = settings.openai_api_key
+    
+    def _validate_path(self, path: str) -> Path:
+        """
+        Validate and normalize a file path to prevent path traversal attacks.
+        
+        Args:
+            path: The path to validate
+            
+        Returns:
+            Validated Path object
+            
+        Raises:
+            ValueError: If the path is invalid or contains path traversal
+        """
+        # Convert to absolute path and resolve
+        abs_path = Path(path).resolve()
+        
+        # Check if path exists
+        if not abs_path.exists():
+            raise ValueError(f"Path does not exist: {path}")
+        
+        return abs_path
     
     def _get_embedding(self, text: str) -> List[float]:
         """
@@ -92,31 +115,59 @@ class KnowledgeBase:
             
         Returns:
             Dictionary with indexing statistics
+            
+        Raises:
+            ValueError: If the directory path is invalid
         """
         if extensions is None:
             extensions = ['.py', '.md', '.txt', '.js', '.ts', '.java', '.cpp', '.h']
         
+        # Validate and normalize the directory path
+        try:
+            validated_dir = self._validate_path(directory_path)
+        except ValueError as e:
+            return {
+                'indexed': 0,
+                'files': [],
+                'errors': [{'path': directory_path, 'error': str(e)}]
+            }
+        
+        # Ensure it's a directory
+        if not validated_dir.is_dir():
+            return {
+                'indexed': 0,
+                'files': [],
+                'errors': [{'path': directory_path, 'error': 'Path is not a directory'}]
+            }
+        
         indexed_files = []
         errors = []
         
-        for root, _, files in os.walk(directory_path):
-            for file in files:
-                if any(file.endswith(ext) for ext in extensions):
-                    file_path = os.path.join(root, file)
-                    try:
-                        with open(file_path, 'r', encoding='utf-8') as f:
-                            content = f.read()
-                        
-                        file_id = self.index_file(file_path, content)
-                        indexed_files.append({
-                            'id': file_id,
-                            'path': file_path
-                        })
-                    except Exception as e:
-                        errors.append({
-                            'path': file_path,
-                            'error': str(e)
-                        })
+        # Use Path.rglob for safer directory traversal
+        for ext in extensions:
+            # Create pattern without leading slash - rglob needs relative patterns
+            pattern = f"*{ext}"
+            for file_path in validated_dir.rglob(pattern):
+                try:
+                    # Additional check to ensure we're still within the validated directory
+                    if not str(file_path.resolve()).startswith(str(validated_dir)):
+                        continue
+                    
+                    # Skip if it's not a file
+                    if not file_path.is_file():
+                        continue
+                    
+                    content = file_path.read_text(encoding='utf-8')
+                    file_id = self.index_file(str(file_path), content)
+                    indexed_files.append({
+                        'id': file_id,
+                        'path': str(file_path)
+                    })
+                except Exception as e:
+                    errors.append({
+                        'path': str(file_path),
+                        'error': str(e)
+                    })
         
         return {
             'indexed': len(indexed_files),
