@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurea Orchestrator - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .header p {
+            color: #bdc3c7;
+            margin-top: 5px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .budget-panel {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .budget-panel h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .org-selector {
+            margin-bottom: 30px;
+        }
+        
+        .org-selector label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .org-selector select {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .budget-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .stat-card.warning {
+            border-left-color: #f39c12;
+        }
+        
+        .stat-card.danger {
+            border-left-color: #e74c3c;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        
+        .stat-detail {
+            font-size: 12px;
+            color: #95a5a6;
+            margin-top: 8px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #3498db;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-fill.warning {
+            background: #f39c12;
+        }
+        
+        .progress-fill.danger {
+            background: #e74c3c;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+        }
+        
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        
+        .mode-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .mode-badge.soft {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .mode-badge.hard {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎯 Aurea Orchestrator</h1>
+        <p>Automated Unified Reasoning & Execution Agents - Budget Management</p>
+    </div>
+    
+    <div class="container">
+        <div class="budget-panel">
+            <h2>Budget Dashboard</h2>
+            
+            <div class="org-selector">
+                <label for="org-select">Select Organization:</label>
+                <select id="org-select">
+                    <option value="">-- Select an organization --</option>
+                </select>
+            </div>
+            
+            <div id="budget-content">
+                <div class="loading">Please select an organization to view budget information</div>
+            </div>
+        </div>
+        
+        <div class="budget-panel">
+            <h2>Quick Actions</h2>
+            <a href="/billing/summary" class="btn">View Billing Summary</a>
+            <button class="btn btn-secondary" onclick="refreshData()">Refresh Data</button>
+        </div>
+    </div>
+    
+    <script>
+        let organizations = [];
+        let currentOrgId = null;
+        
+        async function loadOrganizations() {
+            try {
+                const response = await fetch('/api/organizations');
+                organizations = await response.json();
+                
+                const select = document.getElementById('org-select');
+                select.innerHTML = '<option value="">-- Select an organization --</option>';
+                
+                organizations.forEach(org => {
+                    const option = document.createElement('option');
+                    option.value = org.id;
+                    option.textContent = org.name;
+                    select.appendChild(option);
+                });
+                
+                // Auto-select first org if available
+                if (organizations.length > 0) {
+                    select.value = organizations[0].id;
+                    await loadBudgetData(organizations[0].id);
+                }
+            } catch (error) {
+                console.error('Error loading organizations:', error);
+                document.getElementById('budget-content').innerHTML = 
+                    '<div class="error">Error loading organizations. Please try again.</div>';
+            }
+        }
+        
+        async function loadBudgetData(orgId) {
+            currentOrgId = orgId;
+            
+            if (!orgId) {
+                document.getElementById('budget-content').innerHTML = 
+                    '<div class="loading">Please select an organization to view budget information</div>';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/billing/summary/${orgId}`);
+                const data = await response.json();
+                
+                displayBudgetData(data);
+            } catch (error) {
+                console.error('Error loading budget data:', error);
+                document.getElementById('budget-content').innerHTML = 
+                    '<div class="error">Error loading budget data. Please try again.</div>';
+            }
+        }
+        
+        function displayBudgetData(data) {
+            const org = data.organization;
+            const daily = data.daily;
+            const monthly = data.monthly;
+            const jobs = data.jobs;
+            
+            const dailyPercent = Math.min(100, daily.percentage);
+            const monthlyPercent = Math.min(100, monthly.percentage);
+            
+            const dailyClass = dailyPercent >= 90 ? 'danger' : dailyPercent >= 70 ? 'warning' : '';
+            const monthlyClass = monthlyPercent >= 90 ? 'danger' : monthlyPercent >= 70 ? 'warning' : '';
+            
+            const html = `
+                <div style="margin-bottom: 20px;">
+                    <strong>Organization:</strong> ${org.name}
+                    <span class="mode-badge ${org.budget_mode}">${org.budget_mode} mode</span>
+                </div>
+                
+                <div class="budget-stats">
+                    <div class="stat-card ${dailyClass}">
+                        <div class="stat-label">Daily Budget</div>
+                        <div class="stat-value">$${daily.usage.toFixed(2)}</div>
+                        <div class="stat-detail">of $${daily.limit.toFixed(2)} (${dailyPercent.toFixed(1)}%)</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill ${dailyClass}" style="width: ${dailyPercent}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card ${monthlyClass}">
+                        <div class="stat-label">Monthly Budget</div>
+                        <div class="stat-value">$${monthly.usage.toFixed(2)}</div>
+                        <div class="stat-detail">of $${monthly.limit.toFixed(2)} (${monthlyPercent.toFixed(1)}%)</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill ${monthlyClass}" style="width: ${monthlyPercent}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Total Jobs</div>
+                        <div class="stat-value">${jobs.total}</div>
+                        <div class="stat-detail">
+                            ${jobs.completed} completed, ${jobs.failed} failed
+                            ${jobs.budget_exceeded > 0 ? `, ${jobs.budget_exceeded} budget exceeded` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Daily Remaining</div>
+                        <div class="stat-value">$${daily.remaining.toFixed(2)}</div>
+                        <div class="stat-detail">Available for today</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('budget-content').innerHTML = html;
+        }
+        
+        function refreshData() {
+            if (currentOrgId) {
+                loadBudgetData(currentOrgId);
+            }
+        }
+        
+        document.getElementById('org-select').addEventListener('change', (e) => {
+            loadBudgetData(e.target.value);
+        });
+        
+        // Load organizations on page load
+        loadOrganizations();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            if (currentOrgId) {
+                loadBudgetData(currentOrgId);
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

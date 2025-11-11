@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing Summary - Aurea Orchestrator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .header p {
+            color: #bdc3c7;
+            margin-top: 5px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .summary-panel {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .summary-panel h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .org-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+        }
+        
+        .org-info h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .info-value {
+            color: #2c3e50;
+        }
+        
+        .budget-section {
+            margin-bottom: 30px;
+        }
+        
+        .budget-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .budget-bars {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .budget-bar {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+        }
+        
+        .budget-bar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .budget-bar-title {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .budget-bar-amount {
+            font-size: 18px;
+            font-weight: 700;
+            color: #3498db;
+        }
+        
+        .budget-bar-limit {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 24px;
+            background: #ecf0f1;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+        }
+        
+        .progress-bar.warning {
+            background: linear-gradient(90deg, #f39c12, #e67e22);
+        }
+        
+        .progress-bar.danger {
+            background: linear-gradient(90deg, #e74c3c, #c0392b);
+        }
+        
+        .progress-percent {
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .budget-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .detail-item {
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .detail-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .jobs-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .job-stat {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .job-stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #3498db;
+            margin-bottom: 5px;
+        }
+        
+        .job-stat-label {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        
+        .mode-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .mode-badge.soft {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .mode-badge.hard {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 20px;
+            transition: background 0.2s;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+        }
+        
+        .org-list {
+            list-style: none;
+        }
+        
+        .org-list li {
+            padding: 15px;
+            background: #f8f9fa;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        
+        .org-list a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .org-list a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Billing Summary</h1>
+        <p>Aurea Orchestrator - Budget & Usage Report</p>
+    </div>
+    
+    <div class="container">
+        {% if summary %}
+        <div class="summary-panel">
+            <h2>Organization Details</h2>
+            <div class="org-info">
+                <h3>{{ summary.organization.name }}</h3>
+                <div class="info-row">
+                    <span class="info-label">Organization ID:</span>
+                    <span class="info-value">{{ summary.organization.id }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Budget Mode:</span>
+                    <span class="info-value">
+                        <span class="mode-badge {{ summary.organization.budget_mode }}">
+                            {{ summary.organization.budget_mode }}
+                        </span>
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Daily Budget Limit:</span>
+                    <span class="info-value">${{ "%.2f"|format(summary.daily.limit) }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Monthly Budget Limit:</span>
+                    <span class="info-value">${{ "%.2f"|format(summary.monthly.limit) }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="summary-panel">
+            <h2>Budget Usage</h2>
+            
+            <div class="budget-section">
+                <h3>Daily Budget</h3>
+                <div class="budget-bars">
+                    <div class="budget-bar">
+                        <div class="budget-bar-header">
+                            <span class="budget-bar-title">Today's Usage</span>
+                            <span class="budget-bar-amount">${{ "%.2f"|format(summary.daily.usage) }}</span>
+                        </div>
+                        <div class="progress-container">
+                            {% set daily_percent = [summary.daily.percentage, 100]|min %}
+                            {% set daily_class = 'danger' if daily_percent >= 90 else ('warning' if daily_percent >= 70 else '') %}
+                            <div class="progress-bar {{ daily_class }}" style="width: {{ daily_percent }}%">
+                                <span class="progress-percent">{{ "%.1f"|format(daily_percent) }}%</span>
+                            </div>
+                        </div>
+                        <div class="budget-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Limit</div>
+                                <div class="detail-value">${{ "%.2f"|format(summary.daily.limit) }}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Remaining</div>
+                                <div class="detail-value">${{ "%.2f"|format(summary.daily.remaining) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="budget-section">
+                <h3>Monthly Budget</h3>
+                <div class="budget-bars">
+                    <div class="budget-bar">
+                        <div class="budget-bar-header">
+                            <span class="budget-bar-title">This Month's Usage</span>
+                            <span class="budget-bar-amount">${{ "%.2f"|format(summary.monthly.usage) }}</span>
+                        </div>
+                        <div class="progress-container">
+                            {% set monthly_percent = [summary.monthly.percentage, 100]|min %}
+                            {% set monthly_class = 'danger' if monthly_percent >= 90 else ('warning' if monthly_percent >= 70 else '') %}
+                            <div class="progress-bar {{ monthly_class }}" style="width: {{ monthly_percent }}%">
+                                <span class="progress-percent">{{ "%.1f"|format(monthly_percent) }}%</span>
+                            </div>
+                        </div>
+                        <div class="budget-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Limit</div>
+                                <div class="detail-value">${{ "%.2f"|format(summary.monthly.limit) }}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Remaining</div>
+                                <div class="detail-value">${{ "%.2f"|format(summary.monthly.remaining) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="summary-panel">
+            <h2>Job Statistics</h2>
+            <div class="jobs-stats">
+                <div class="job-stat">
+                    <div class="job-stat-value">{{ summary.jobs.total }}</div>
+                    <div class="job-stat-label">Total Jobs</div>
+                </div>
+                <div class="job-stat">
+                    <div class="job-stat-value" style="color: #27ae60;">{{ summary.jobs.completed }}</div>
+                    <div class="job-stat-label">Completed</div>
+                </div>
+                <div class="job-stat">
+                    <div class="job-stat-value" style="color: #e74c3c;">{{ summary.jobs.failed }}</div>
+                    <div class="job-stat-label">Failed</div>
+                </div>
+                <div class="job-stat">
+                    <div class="job-stat-value" style="color: #f39c12;">{{ summary.jobs.budget_exceeded }}</div>
+                    <div class="job-stat-label">Budget Exceeded</div>
+                </div>
+            </div>
+        </div>
+        
+        <a href="/" class="btn">← Back to Dashboard</a>
+        
+        {% elif organizations %}
+        <div class="summary-panel">
+            <h2>Select an Organization</h2>
+            <ul class="org-list">
+                {% for org in organizations %}
+                <li>
+                    <a href="/billing/summary?organization_id={{ org.id }}">{{ org.name }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <a href="/" class="btn">← Back to Dashboard</a>
+        
+        {% else %}
+        <div class="summary-panel">
+            <h2>No Organizations Found</h2>
+            <p>Please create an organization first.</p>
+        </div>
+        
+        <a href="/" class="btn">← Back to Dashboard</a>
+        {% endif %}
+    </div>
+</body>
+</html>
