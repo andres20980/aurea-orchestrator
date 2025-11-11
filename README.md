@@ -174,6 +174,31 @@ Run tests:
 pytest test_app.py -v
 ```
 
+### Examples
+
+The `examples/` directory contains sample scripts demonstrating API usage:
+
+**Bash Example:**
+```bash
+# Start the server first
+python app.py
+
+# In another terminal, run the example
+./examples/run_benchmarks.sh
+```
+
+**Python Example:**
+```bash
+# Install example dependencies
+pip install -r examples/requirements.txt
+
+# Start the server first
+python app.py
+
+# In another terminal, run the example
+python examples/benchmark_example.py
+```
+
 ### Project Structure
 
 ```
@@ -183,6 +208,14 @@ aurea-orchestrator/
 ├── requirements.txt       # Production dependencies
 ├── requirements-dev.txt   # Development dependencies
 ├── .gitignore            # Git ignore patterns
+├── Dockerfile            # Docker image definition
+├── docker-compose.yml    # Docker Compose configuration
+├── prometheus.yml        # Prometheus configuration
+├── GRAFANA.md            # Grafana setup guide
+├── examples/             # Example scripts
+│   ├── run_benchmarks.sh      # Bash example
+│   ├── benchmark_example.py   # Python example
+│   └── requirements.txt       # Example dependencies
 └── README.md             # This file
 ```
 
