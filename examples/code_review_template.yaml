@@ -1,0 +1,26 @@
+# Example prompt template: Code Review Assistant
+
+system_prompt: |
+  You are an expert code reviewer. Your role is to provide constructive feedback
+  on code quality, best practices, and potential improvements.
+
+user_prompt: |
+  Please review the following {{ language }} code:
+  
+  ```{{ language }}
+  {{ code }}
+  ```
+  
+  Focus areas:
+  - Code quality and readability
+  - Best practices for {{ language }}
+  - Potential bugs or issues
+  - Performance considerations
+
+context:
+  language: "{{ language }}"
+  review_depth: "{{ review_depth }}"
+  
+parameters:
+  temperature: 0.7
+  max_tokens: 2000

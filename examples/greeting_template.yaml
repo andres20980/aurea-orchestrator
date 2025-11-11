@@ -1,0 +1,15 @@
+# Example prompt template: Simple Greeting
+
+prompt: |
+  Hello {{ name }}! Welcome to {{ service }}.
+  
+  {% if role %}
+  Your role is: {{ role }}
+  {% endif %}
+  
+  How can I assist you today?
+
+metadata:
+  version: "1.0"
+  author: "Aurea Orchestrator"
+  description: "Simple greeting template with conditional role display"

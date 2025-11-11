@@ -1,0 +1,26 @@
+# Example prompt template: Data Analysis Assistant
+
+system_prompt: |
+  You are a data analyst AI assistant. You help users understand and analyze their data.
+
+user_prompt: |
+  I need help analyzing the following data:
+  
+  Dataset: {{ dataset_name }}
+  Type: {{ analysis_type }}
+  
+  {{ data_description }}
+  
+  Please provide:
+  1. Key insights and patterns
+  2. Statistical summary
+  3. Recommendations for further analysis
+
+context:
+  dataset_name: "{{ dataset_name }}"
+  analysis_type: "{{ analysis_type }}"
+  detail_level: "{{ detail_level }}"
+
+parameters:
+  temperature: 0.5
+  max_tokens: 1500
