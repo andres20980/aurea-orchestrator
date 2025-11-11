@@ -110,6 +110,12 @@ This demonstrates:
 Run the test suite:
 
 ```bash
+python run_tests.py
+```
+
+Or run individual test files:
+
+```bash
 PYTHONPATH=. python tests/test_evaluator.py
 PYTHONPATH=. python tests/test_router.py
 ```
@@ -182,3 +188,7 @@ runner.register_model_client(ModelType.CLAUDE, claude_client)
 ## License
 
 MIT License
+
+## Additional Documentation
+
+- [Configuration Guide](CONFIGURATION.md) - Detailed configuration and customization options
