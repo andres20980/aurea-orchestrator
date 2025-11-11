@@ -1,125 +1,127 @@
 """
-Example usage of the aurea-orchestrator monitoring system.
+Example usage of GitOps automation.
+
+This script demonstrates how to use the GitOps automation
+to create branches, commit changes, and open PRs when a job
+is approved.
 """
-import time
-import random
-from middleware import monitor_task
+
+import sys
+from tools.git_ops import GitOpsAutomation, GitOpsError, on_job_approved
 
 
-# Example 1: Simple task monitoring
-@monitor_task(job_id="example_job_1", task_name="text_generation", model_used="gpt-4")
-def generate_text(prompt):
-    """Simulate text generation."""
-    time.sleep(random.uniform(0.5, 1.5))  # Simulate API call
-    result = f"Generated response for: {prompt}"
-    tokens = random.randint(100, 500)
-    return result, tokens
+def example_basic_usage():
+    """Basic example of using GitOps automation."""
+    try:
+        # Simple one-line usage when job is approved
+        result = on_job_approved("job-12345")
+        
+        if result:
+            print(f"✓ GitOps workflow completed successfully!")
+            print(f"  - Branch: {result['branch_name']}")
+            print(f"  - Commit: {result['commit_sha']}")
+            print(f"  - PR #{result['pr_number']}: {result['pr_url']}")
+        else:
+            print("Job status was not APPROVED, no action taken.")
+            
+    except GitOpsError as e:
+        print(f"✗ GitOps workflow failed: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
-# Example 2: Task returning dict
-@monitor_task(job_id="example_job_2", task_name="summarization", model_used="claude-3-sonnet")
-def summarize_document(document):
-    """Simulate document summarization."""
-    time.sleep(random.uniform(0.3, 1.0))
-    summary = f"Summary of {len(document)} chars"
-    return {
-        'summary': summary,
-        'tokens': len(document) // 4  # Rough estimate
-    }
+def example_advanced_usage():
+    """Advanced example with custom configuration."""
+    try:
+        # Initialize GitOps automation
+        gitops = GitOpsAutomation(repo_path=".")
+        
+        job_id = "job-67890"
+        job_status = "APPROVED"  # This would come from your job system
+        
+        # Execute workflow with custom messages
+        result = gitops.execute_gitops_workflow(
+            job_id=job_id,
+            job_status=job_status,
+            commit_message=f"Apply approved changes for {job_id}",
+            pr_title=f"[Automated] Changes for job {job_id}",
+            pr_body="""## Automated Job Changes
+
+This PR contains changes that were automatically approved and applied.
+
+**Review carefully before merging.**
+"""
+        )
+        
+        if result:
+            print(f"✓ GitOps workflow completed!")
+            print(f"  - Job ID: {result['job_id']}")
+            print(f"  - PR URL: {result['pr_url']}")
+        
+    except GitOpsError as e:
+        print(f"✗ Error: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
-# Example 3: Custom cost estimation
-def custom_cost_estimator(model_name, token_count):
-    """Custom cost calculation based on your pricing."""
-    pricing_tiers = {
-        'premium': 0.05,
-        'standard': 0.01,
-        'economy': 0.001
-    }
-    tier = 'standard'  # Could be determined by model_name
-    return (token_count / 1000.0) * pricing_tiers[tier]
-
-
-@monitor_task(
-    job_id="example_job_3",
-    task_name="custom_processing",
-    model_used="custom-model",
-    estimate_cost_fn=custom_cost_estimator
-)
-def process_with_custom_pricing(data):
-    """Task with custom cost estimation."""
-    time.sleep(0.5)
-    result = f"Processed {data}"
-    tokens = len(data) * 2
-    return result, tokens
-
-
-# Example 4: Complex workflow
-def run_complete_workflow():
-    """Run a complete workflow with multiple tasks."""
-    job_id = "workflow_example"
-    
-    # Step 1: Data preparation
-    @monitor_task(job_id, "data_prep", "gpt-3.5-turbo")
-    def prepare_data(raw_data):
-        time.sleep(0.2)
-        prepared = f"Prepared: {raw_data}"
-        return prepared, 50
-    
-    # Step 2: Main processing
-    @monitor_task(job_id, "main_processing", "gpt-4")
-    def process_main(data):
-        time.sleep(1.0)
-        processed = f"Processed: {data}"
-        return processed, 300
-    
-    # Step 3: Post-processing
-    @monitor_task(job_id, "post_processing", "claude-3-haiku")
-    def post_process(data):
-        time.sleep(0.3)
-        final = f"Final: {data}"
-        return final, 100
-    
-    # Execute workflow
-    raw = "input data"
-    step1 = prepare_data(raw)
-    step2 = process_main(step1[0])
-    step3 = post_process(step2[0])
-    
-    return step3
-
-
-def main():
-    """Run examples."""
-    print("Running aurea-orchestrator monitoring examples...\n")
-    
-    # Example 1
-    print("Example 1: Text generation")
-    result1 = generate_text("Hello, how are you?")
-    print(f"Result: {result1[0]}\n")
-    
-    # Example 2
-    print("Example 2: Document summarization")
-    result2 = summarize_document("This is a long document that needs to be summarized.")
-    print(f"Summary: {result2['summary']}\n")
-    
-    # Example 3
-    print("Example 3: Custom pricing")
-    result3 = process_with_custom_pricing("custom data")
-    print(f"Result: {result3[0]}\n")
-    
-    # Example 4
-    print("Example 4: Complete workflow")
-    final = run_complete_workflow()
-    print(f"Workflow complete: {final[0]}\n")
-    
-    print("\nAll examples completed!")
-    print("Check metrics via API:")
-    print("  curl http://localhost:4000/metrics/jobs/example_job_1")
-    print("  curl http://localhost:4000/metrics/jobs/workflow_example")
+def example_step_by_step():
+    """Example showing each step of the workflow."""
+    try:
+        gitops = GitOpsAutomation()
+        
+        job_id = "job-99999"
+        
+        # Step 1: Create branch
+        print(f"Creating branch for job {job_id}...")
+        branch_name = gitops.create_branch(job_id)
+        print(f"✓ Branch created: {branch_name}")
+        
+        # Step 2: Commit changes
+        print("Committing changes...")
+        commit_sha = gitops.commit_changes(
+            job_id=job_id,
+            message=f"Automated changes for {job_id}"
+        )
+        print(f"✓ Changes committed: {commit_sha[:8]}")
+        
+        # Step 3: Push branch
+        print("Pushing branch to remote...")
+        gitops.push_branch(branch_name)
+        print(f"✓ Branch pushed")
+        
+        # Step 4: Create PR
+        print("Creating pull request...")
+        pr_info = gitops.create_pull_request(
+            job_id=job_id,
+            branch_name=branch_name
+        )
+        print(f"✓ PR created: {pr_info['url']}")
+        
+    except GitOpsError as e:
+        print(f"✗ Error: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
-    # Make sure the app is running before executing examples
-    print("Note: Make sure the Flask app is running (python app.py) before running examples.\n")
-    main()
+    print("=== GitOps Automation Examples ===\n")
+    
+    print("Example 1: Basic Usage")
+    print("-" * 40)
+    # Uncomment to run:
+    # example_basic_usage()
+    print("(Commented out - uncomment to run)\n")
+    
+    print("Example 2: Advanced Usage")
+    print("-" * 40)
+    # Uncomment to run:
+    # example_advanced_usage()
+    print("(Commented out - uncomment to run)\n")
+    
+    print("Example 3: Step-by-Step")
+    print("-" * 40)
+    # Uncomment to run:
+    # example_step_by_step()
+    print("(Commented out - uncomment to run)\n")
+    
+    print("\nTo use these examples:")
+    print("1. Set your GITHUB_TOKEN environment variable")
+    print("2. Uncomment the example you want to run")
+    print("3. Run: python example_usage.py")
