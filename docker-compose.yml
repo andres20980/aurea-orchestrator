@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  aurea-orchestrator:
+    image: ghcr.io/andres20980/aurea-orchestrator:latest
+    container_name: aurea-orchestrator
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
