@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  orchestrator:
+    build: .
+    container_name: aurea-orchestrator
+    ports:
+      - "8000:8000"
+    networks:
+      - aurea-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: aurea-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - aurea-network
+    depends_on:
+      - orchestrator
+
+  grafana:
+    image: grafana/grafana:10.2.2
+    container_name: aurea-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - aurea-network
+    depends_on:
+      - prometheus
+
+networks:
+  aurea-network:
+    driver: bridge
+
+volumes:
+  prometheus-data:
+  grafana-data:
