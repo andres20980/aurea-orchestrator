@@ -55,6 +55,31 @@ class TestSandboxRunner:
         assert runner.cpu_limit == 2.0
         assert runner.memory_limit == "1g"
         assert runner.default_timeout == 60
+    
+    def test_path_traversal_prevention(self):
+        """Test that path traversal in filenames is prevented."""
+        runner = SandboxRunner()
+        
+        # Test with path separator
+        with pytest.raises(ValueError, match="Path separators not allowed"):
+            runner.run(
+                code="print('test')",
+                files={"../etc/passwd": "malicious"}
+            )
+        
+        # Test with backslash
+        with pytest.raises(ValueError, match="Path separators not allowed"):
+            runner.run(
+                code="print('test')",
+                files={"..\\windows\\system32": "malicious"}
+            )
+        
+        # Test with leading dot
+        with pytest.raises(ValueError, match="Path separators not allowed"):
+            runner.run(
+                code="print('test')",
+                files={".hidden": "content"}
+            )
 
 
 if __name__ == "__main__":

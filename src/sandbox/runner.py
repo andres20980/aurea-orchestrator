@@ -85,8 +85,17 @@ class SandboxRunner:
             # Add additional files if provided
             if files:
                 for filename, content in files.items():
-                    file_path = os.path.join(workspace, filename)
-                    with open(file_path, 'w') as f:
+                    # Validate filename to prevent path traversal
+                    # Only allow simple filenames without path separators
+                    if '/' in filename or '\\' in filename or filename.startswith('.'):
+                        raise ValueError(f"Invalid filename: {filename}. Path separators not allowed.")
+                    
+                    # Ensure filename doesn't try to escape workspace
+                    safe_path = os.path.normpath(os.path.join(workspace, filename))
+                    if not safe_path.startswith(workspace):
+                        raise ValueError(f"Invalid filename: {filename}. Path traversal not allowed.")
+                    
+                    with open(safe_path, 'w') as f:
                         f.write(content)
             
             # Prepare execution command
