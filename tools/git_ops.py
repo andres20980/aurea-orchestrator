@@ -77,22 +77,23 @@ class GitOpsAutomation:
         try:
             remote_url = self._run_git_command(["remote", "get-url", "origin"])
             
+            # Remove .git suffix if present
+            remote_url = remote_url.rstrip(".git")
+            
             # Parse GitHub URL (supports both HTTPS and SSH)
-            if "github.com" in remote_url:
-                # Remove .git suffix if present
-                remote_url = remote_url.rstrip(".git")
-                
-                if remote_url.startswith("git@github.com:"):
-                    # SSH format: git@github.com:owner/repo.git
-                    parts = remote_url.replace("git@github.com:", "").split("/")
-                elif "https://github.com/" in remote_url:
-                    # HTTPS format: https://github.com/owner/repo.git
-                    parts = remote_url.split("github.com/")[1].split("/")
-                else:
-                    raise GitOpsError(f"Unsupported GitHub URL format: {remote_url}")
-                
-                if len(parts) >= 2:
-                    return parts[0], parts[1]
+            # SSH format: git@github.com:owner/repo.git
+            if remote_url.startswith("git@github.com:"):
+                parts = remote_url.replace("git@github.com:", "").split("/")
+            # HTTPS format: https://github.com/owner/repo.git
+            elif remote_url.startswith("https://github.com/"):
+                # Extract path after github.com/
+                path = remote_url[len("https://github.com/"):]
+                parts = path.split("/")
+            else:
+                raise GitOpsError(f"Unsupported GitHub URL format: {remote_url}")
+            
+            if len(parts) >= 2:
+                return parts[0], parts[1]
             
             raise GitOpsError(f"Could not parse GitHub repository from URL: {remote_url}")
         except Exception as e:
