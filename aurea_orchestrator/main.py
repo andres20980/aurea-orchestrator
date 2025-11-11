@@ -1,7 +1,6 @@
 """FastAPI application for Aurea Orchestrator."""
 
 import uuid
-from typing import Dict
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -79,9 +78,7 @@ async def get_task(task_id: str):
     elif result.state == "STARTED":
         return TaskResponse(task_id=task_id, status=TaskStatus.IN_PROGRESS)
     elif result.state == "SUCCESS":
-        return TaskResponse(
-            task_id=task_id, status=TaskStatus.COMPLETED, result=result.result
-        )
+        return TaskResponse(task_id=task_id, status=TaskStatus.COMPLETED, result=result.result)
     elif result.state == "FAILURE":
         raise HTTPException(status_code=500, detail=f"Task failed: {str(result.info)}")
     else:
@@ -89,7 +86,7 @@ async def get_task(task_id: str):
 
 
 @app.get("/tasks/{task_id}/result")
-async def get_task_result(task_id: str) -> Dict:
+async def get_task_result(task_id: str) -> dict:
     """Get detailed task results.
 
     Args:

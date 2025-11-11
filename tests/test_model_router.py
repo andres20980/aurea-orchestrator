@@ -1,8 +1,6 @@
 """Tests for model router."""
 
-import pytest
-
-from aurea_orchestrator.model_router import ModelRouter, ModelType, TaskComplexity
+from aurea_orchestrator.model_router import ModelRouter, ModelType
 
 
 class TestModelRouter:
@@ -21,8 +19,8 @@ class TestModelRouter:
     def test_calculate_complexity_complex_task(self):
         """Test complexity calculation for a complex task."""
         router = ModelRouter(complexity_threshold=0.5)
-        task = """Design and implement a complex microservices architecture with 
-        advanced design patterns for a distributed system that requires optimization 
+        task = """Design and implement a complex microservices architecture with
+        advanced design patterns for a distributed system that requires optimization
         and multi-step integration with various services."""
 
         complexity = router.calculate_complexity(task)
@@ -50,9 +48,7 @@ class TestModelRouter:
         complexity_with_reasoning = router.calculate_complexity(
             task, metadata={"requires_reasoning": True}
         )
-        complexity_multi_agent = router.calculate_complexity(
-            task, metadata={"multi_agent": True}
-        )
+        complexity_multi_agent = router.calculate_complexity(task, metadata={"multi_agent": True})
 
         assert complexity_with_reasoning > complexity_basic
         assert complexity_multi_agent > complexity_basic
@@ -69,8 +65,9 @@ class TestModelRouter:
     def test_determine_model_type_complex(self):
         """Test model type determination for complex tasks."""
         router = ModelRouter(complexity_threshold=0.5)
-        task = """Design a complex distributed architecture with multiple design patterns 
-        and advanced algorithms requiring optimization and refactoring"""
+        task = """Design a complex distributed system architecture with multiple design patterns,
+        advanced algorithms requiring optimization, refactoring, and multi-step integration
+        across various microservices with careful consideration of system-level performance."""
 
         model_type = router.determine_model_type(task)
 

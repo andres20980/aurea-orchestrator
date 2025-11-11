@@ -1,16 +1,15 @@
 """Tests for agents."""
 
-import pytest
 from unittest.mock import Mock, patch
 
 from aurea_orchestrator.agents import (
-    ContextAgent,
     ArchitectAgent,
     CodeAgent,
-    TestAgent,
+    ContextAgent,
     ReviewAgent,
+    TestAgent,
 )
-from aurea_orchestrator.schemas import AgentType, WorkflowState, TaskStatus
+from aurea_orchestrator.schemas import AgentType, TaskStatus, WorkflowState
 
 
 class TestContextAgent:

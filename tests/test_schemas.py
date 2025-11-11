@@ -1,14 +1,12 @@
 """Tests for schemas."""
 
-import pytest
-
 from aurea_orchestrator.schemas import (
-    AgentType,
-    TaskStatus,
     AgentMessage,
-    WorkflowState,
+    AgentType,
     TaskRequest,
     TaskResponse,
+    TaskStatus,
+    WorkflowState,
 )
 
 

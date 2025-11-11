@@ -1,9 +1,9 @@
 """Base agent class and specific agent implementations."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any
+from typing import Any
 
-from langchain.schema import BaseLanguageModel, HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 
 from aurea_orchestrator.model_router import model_router
 from aurea_orchestrator.schemas import AgentType, WorkflowState
@@ -25,7 +25,7 @@ class BaseAgent(ABC):
         """Get the system prompt for this agent."""
         pass
 
-    def process(self, state: WorkflowState) -> Dict[str, Any]:
+    def process(self, state: WorkflowState) -> dict[str, Any]:
         """Process the workflow state.
 
         Args:
@@ -58,7 +58,7 @@ class BaseAgent(ABC):
         pass
 
     @abstractmethod
-    def _process_response(self, response: str, state: WorkflowState) -> Dict[str, Any]:
+    def _process_response(self, response: str, state: WorkflowState) -> dict[str, Any]:
         """Process the model response and return state updates."""
         pass
 
@@ -91,7 +91,7 @@ Provide:
 4. Complexity assessment
 5. Important considerations"""
 
-    def _process_response(self, response: str, state: WorkflowState) -> Dict[str, Any]:
+    def _process_response(self, response: str, state: WorkflowState) -> dict[str, Any]:
         return {"context": response}
 
 
@@ -125,7 +125,7 @@ Provide:
 4. Data flow
 5. Technology stack recommendations"""
 
-    def _process_response(self, response: str, state: WorkflowState) -> Dict[str, Any]:
+    def _process_response(self, response: str, state: WorkflowState) -> dict[str, Any]:
         return {"architecture": response}
 
 
@@ -159,7 +159,7 @@ Provide:
 3. Error handling
 4. Best practices implementation"""
 
-    def _process_response(self, response: str, state: WorkflowState) -> Dict[str, Any]:
+    def _process_response(self, response: str, state: WorkflowState) -> dict[str, Any]:
         return {"code": response}
 
 
@@ -193,7 +193,7 @@ Provide:
 3. Integration tests if needed
 4. Clear test descriptions"""
 
-    def _process_response(self, response: str, state: WorkflowState) -> Dict[str, Any]:
+    def _process_response(self, response: str, state: WorkflowState) -> dict[str, Any]:
         return {"tests": response}
 
 
@@ -228,5 +228,5 @@ Provide:
 4. Performance considerations
 5. Recommended improvements"""
 
-    def _process_response(self, response: str, state: WorkflowState) -> Dict[str, Any]:
+    def _process_response(self, response: str, state: WorkflowState) -> dict[str, Any]:
         return {"review": response}

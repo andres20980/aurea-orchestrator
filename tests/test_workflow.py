@@ -1,9 +1,8 @@
 """Tests for workflow orchestration."""
 
-import pytest
 from unittest.mock import Mock, patch
 
-from aurea_orchestrator.schemas import WorkflowState, TaskStatus
+from aurea_orchestrator.schemas import TaskStatus, WorkflowState
 from aurea_orchestrator.workflow import WorkflowOrchestrator
 
 
@@ -26,9 +25,7 @@ class TestWorkflowOrchestrator:
     @patch("aurea_orchestrator.workflow.CodeAgent")
     @patch("aurea_orchestrator.workflow.TestAgent")
     @patch("aurea_orchestrator.workflow.ReviewAgent")
-    def test_context_node(
-        self, mock_review, mock_test, mock_code, mock_architect, mock_context
-    ):
+    def test_context_node(self, mock_review, mock_test, mock_code, mock_architect, mock_context):
         """Test the context node execution."""
         mock_agent = Mock()
         mock_agent.process.return_value = {"context": "Test context"}

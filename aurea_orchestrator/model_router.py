@@ -1,11 +1,11 @@
 """Model Router for selecting between Claude and DeepSeek based on task complexity."""
 
 from enum import Enum
-from typing import Any, Dict
+from typing import Any
 
-from langchain.chat_models import ChatAnthropic, ChatOpenAI
-from langchain.schema import BaseLanguageModel
-from pydantic import BaseModel
+from langchain_anthropic import ChatAnthropic
+from langchain_core.language_models import BaseLanguageModel
+from langchain_openai import ChatOpenAI
 
 from aurea_orchestrator.config import settings
 
@@ -67,7 +67,7 @@ class ModelRouter:
             )
         return self._deepseek_instance
 
-    def calculate_complexity(self, task_description: str, metadata: Dict[str, Any] = None) -> float:
+    def calculate_complexity(self, task_description: str, metadata: dict[str, Any] = None) -> float:
         """Calculate task complexity score.
 
         Args:
@@ -110,7 +110,7 @@ class ModelRouter:
         return min(score, 1.0)
 
     def determine_model_type(
-        self, task_description: str, metadata: Dict[str, Any] = None
+        self, task_description: str, metadata: dict[str, Any] = None
     ) -> ModelType:
         """Determine which model to use based on task complexity.
 
@@ -127,7 +127,9 @@ class ModelRouter:
             return ModelType.CLAUDE
         return ModelType.DEEPSEEK
 
-    def get_model(self, task_description: str, metadata: Dict[str, Any] = None) -> BaseLanguageModel:
+    def get_model(
+        self, task_description: str, metadata: dict[str, Any] = None
+    ) -> BaseLanguageModel:
         """Get the appropriate model for the task.
 
         Args:

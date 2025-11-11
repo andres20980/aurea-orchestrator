@@ -36,7 +36,7 @@ def process_task(task_id: str, task_description: str, metadata: dict = None):
     Returns:
         Dictionary with task results
     """
-    from aurea_orchestrator.schemas import WorkflowState, TaskStatus
+    from aurea_orchestrator.schemas import TaskStatus, WorkflowState
     from aurea_orchestrator.workflow import orchestrator
 
     # Create initial workflow state

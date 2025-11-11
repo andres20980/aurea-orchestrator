@@ -1,6 +1,6 @@
 """Workflow orchestration using LangGraph."""
 
-from typing import Any, Dict
+from typing import Any
 
 from langgraph.graph import END, StateGraph
 
@@ -54,7 +54,7 @@ class WorkflowOrchestrator:
 
         return workflow.compile()
 
-    def _context_node(self, state: WorkflowState) -> Dict[str, Any]:
+    def _context_node(self, state: WorkflowState) -> dict[str, Any]:
         """Execute the context agent.
 
         Args:
@@ -67,7 +67,7 @@ class WorkflowOrchestrator:
         updates["status"] = TaskStatus.IN_PROGRESS
         return updates
 
-    def _architect_node(self, state: WorkflowState) -> Dict[str, Any]:
+    def _architect_node(self, state: WorkflowState) -> dict[str, Any]:
         """Execute the architect agent.
 
         Args:
@@ -78,7 +78,7 @@ class WorkflowOrchestrator:
         """
         return self.architect_agent.process(state)
 
-    def _code_node(self, state: WorkflowState) -> Dict[str, Any]:
+    def _code_node(self, state: WorkflowState) -> dict[str, Any]:
         """Execute the code agent.
 
         Args:
@@ -89,7 +89,7 @@ class WorkflowOrchestrator:
         """
         return self.code_agent.process(state)
 
-    def _test_node(self, state: WorkflowState) -> Dict[str, Any]:
+    def _test_node(self, state: WorkflowState) -> dict[str, Any]:
         """Execute the test agent.
 
         Args:
@@ -100,7 +100,7 @@ class WorkflowOrchestrator:
         """
         return self.test_agent.process(state)
 
-    def _review_node(self, state: WorkflowState) -> Dict[str, Any]:
+    def _review_node(self, state: WorkflowState) -> dict[str, Any]:
         """Execute the review agent.
 
         Args:

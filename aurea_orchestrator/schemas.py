@@ -1,7 +1,7 @@
 """Schemas for Aurea Orchestrator."""
 
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -30,7 +30,7 @@ class AgentMessage(BaseModel):
 
     agent_type: AgentType
     content: str
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class WorkflowState(BaseModel):
@@ -39,20 +39,20 @@ class WorkflowState(BaseModel):
     task_id: str
     task_description: str
     status: TaskStatus = TaskStatus.PENDING
-    context: Optional[str] = None
-    architecture: Optional[str] = None
-    code: Optional[str] = None
-    tests: Optional[str] = None
-    review: Optional[str] = None
-    messages: List[AgentMessage] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    context: str | None = None
+    architecture: str | None = None
+    code: str | None = None
+    tests: str | None = None
+    review: str | None = None
+    messages: list[AgentMessage] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class TaskRequest(BaseModel):
     """Request to create a new task."""
 
     description: str
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class TaskResponse(BaseModel):
@@ -60,4 +60,4 @@ class TaskResponse(BaseModel):
 
     task_id: str
     status: TaskStatus
-    result: Optional[Dict[str, Any]] = None
+    result: dict[str, Any] | None = None

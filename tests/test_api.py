@@ -1,8 +1,9 @@
 """Tests for FastAPI endpoints."""
 
+from unittest.mock import Mock, patch
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import Mock, patch
 
 from aurea_orchestrator.main import app
 from aurea_orchestrator.schemas import TaskStatus

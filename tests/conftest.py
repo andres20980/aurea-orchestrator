@@ -1,7 +1,8 @@
 """Test configuration and fixtures."""
 
-import pytest
 from unittest.mock import Mock
+
+import pytest
 
 from aurea_orchestrator.config import Settings
 
