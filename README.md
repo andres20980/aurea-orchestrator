@@ -301,6 +301,8 @@ pytest tests/test_api.py
 
 ### Project Structure
 
+### Project Structure
+
 ```
 aurea-orchestrator/
 ├── aurea_orchestrator/
@@ -346,6 +348,17 @@ The application uses SQLite by default. The database file `aurea_orchestrator.db
 ## License
 
 MIT
+
+## Security Considerations
+
+The Prompt Registry uses Jinja2 for template rendering, which allows dynamic content generation. Please note:
+
+- **Template Injection**: The system is designed to allow trusted users to create and manage templates. If you expose the API publicly, implement proper authentication and authorization.
+- **Input Validation**: All templates are validated for YAML syntax and Jinja2 template syntax before being stored.
+- **Sandboxing**: Consider implementing additional sandboxing measures if templates come from untrusted sources.
+- **Access Control**: Implement role-based access control (RBAC) for production deployments.
+
+**Recommendation**: Use this system in controlled environments where template creators are trusted users.
 
 ## Contributing
 
