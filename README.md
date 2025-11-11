@@ -33,6 +33,8 @@ plan → implement → {test, review_precheck} → review
 4. **review_precheck**: Performs preliminary review checks (executes in parallel with test)
 5. **review**: Makes final review decision (APPROVED or REJECTED)
 
+**Note on Parallel Execution**: The `test` and `review_precheck` nodes are designed to run in parallel. In the current implementation, they execute sequentially within a combined node (`test_and_review_precheck`) due to LangGraph's constraints on multiple outgoing edges from a single node. However, the architecture is designed to support true parallel execution when using more advanced LangGraph features or distributed task execution systems.
+
 ## Installation
 
 ```bash
@@ -52,6 +54,20 @@ Or with uvicorn:
 ```bash
 uvicorn main:app --host 0.0.0.0 --port 8000
 ```
+
+### Run the Demo
+
+A demo script is provided to showcase the orchestrator's capabilities:
+
+```bash
+python demo.py
+```
+
+This will:
+1. Test the root endpoint
+2. Create a new job
+3. Monitor the job progress in real-time
+4. Display the final results with all node progress details
 
 ### API Endpoints
 
