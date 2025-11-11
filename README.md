@@ -3,6 +3,17 @@ Automated Unified Reasoning & Execution Agents
 
 A lightweight API service for executing synthetic workload benchmarks and exporting metrics to Grafana via Prometheus.
 
+## Quick Start
+
+**Want to get started immediately?** See [QUICKSTART.md](QUICKSTART.md) for a step-by-step guide.
+
+For quick testing:
+```bash
+pip install -r requirements.txt
+python app.py
+curl -X POST http://localhost:5000/benchmark/run -H "Content-Type: application/json" -d '{"num_jobs": 10}'
+```
+
 ## Features
 
 - **Synthetic Workload Benchmarking**: Execute N parallel jobs to simulate workload
