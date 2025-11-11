@@ -1,0 +1,19 @@
+{
+  "app_name": "Aurea Orchestrator",
+  "version": "1.0.0",
+  "compliance": {
+    "pii_retention_days": 90,
+    "anonymization": {
+      "enabled": true,
+      "fields": ["email", "name", "phone", "ssn", "address"]
+    },
+    "audit_logging": {
+      "enabled": true,
+      "log_model_inputs": true,
+      "log_model_outputs": true
+    }
+  },
+  "database": {
+    "url": "sqlite:///./aurea.db"
+  }
+}
